@@ -1,4 +1,5 @@
-import graph.GraphUtils;
+package graph;
+
 import org.junit.Test;
 
 import java.util.Arrays;
