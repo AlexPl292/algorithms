@@ -1,7 +1,6 @@
 import graph.GraphUtils;
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -14,10 +13,43 @@ import static org.junit.Assert.assertEquals;
 public class GraphUtilsTest {
 
     @Test
+    public void testInitList_ZeroSizeList_NoChangesAndErrors() throws Exception {
+        @SuppressWarnings("unchecked")
+        List<Integer>[] adjList = new List[0];
+
+        GraphUtils.invertAdjList(adjList);
+    }
+
+    @Test
+    public void testInitList_OneSizeList_Initialized() throws Exception {
+        @SuppressWarnings("unchecked")
+        List<Integer>[] adjList = new List[1];
+
+        GraphUtils.initAdjList(adjList);
+
+        assertEquals(0, adjList[0].size());
+    }
+
+    @Test
+    public void testInitList_NSizeList_Initialized() throws Exception {
+        int size = 5;
+        @SuppressWarnings("unchecked")
+        List<Integer>[] adjList = new List[size];
+
+        GraphUtils.initAdjList(adjList);
+
+        assertEquals(0, adjList[0].size());
+        assertEquals(0, adjList[1].size());
+        assertEquals(0, adjList[2].size());
+        assertEquals(0, adjList[3].size());
+        assertEquals(0, adjList[4].size());
+    }
+
+    @Test
     public void testInvertAdjList_OneVertex_VertexItself() throws Exception {
         @SuppressWarnings("unchecked")
         List<Integer>[] adjList = new List[1];
-        adjList[0] = new ArrayList<>();
+        GraphUtils.initAdjList(adjList);
 
         List<Integer>[] res = GraphUtils.invertAdjList(adjList);
 
@@ -29,8 +61,7 @@ public class GraphUtilsTest {
     public void testInvertAdjList_TwoVertex_Reversed() throws Exception {
         @SuppressWarnings("unchecked")
         List<Integer>[] adjList = new List[2];
-        adjList[0] = new ArrayList<>();
-        adjList[1] = new ArrayList<>();
+        GraphUtils.initAdjList(adjList);
 
         adjList[0].add(1);
 
@@ -48,11 +79,8 @@ public class GraphUtilsTest {
         int graphSize = 10;
         List<Integer>[] adjList = new List[graphSize];
         List<Integer>[] result = new List[graphSize];
-
-        for (int i = 0; i < graphSize; i++) {
-            adjList[i] = new ArrayList<>();
-            result[i] = new ArrayList<>();
-        }
+        GraphUtils.initAdjList(adjList);
+        GraphUtils.initAdjList(result);
 
         adjList[0].addAll(Arrays.asList(3, 8, 9));
         adjList[1].add(2);
