@@ -1,17 +1,17 @@
 package multithreading.readerwriter.first;
 
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by Alex Plate on 09.10.2018.
  */
 public class Main {
-    private static Lock resourceLock = new ReentrantLock();
-    private static Lock readerLock = new ReentrantLock();
-    private static int readerCount = 0;
+    private static Semaphore resourceLock = new Semaphore(1);
+    private static Semaphore readerLock = new Semaphore(1);
+    private static volatile AtomicInteger readerCount = new AtomicInteger(0);
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         while (true) {
             Writer writer = new Writer();
             Reader reader1 = new Reader();
@@ -22,6 +22,8 @@ public class Main {
             reader1.start();
             reader2.start();
             reader3.start();
+
+            Thread.sleep(1000);
         }
     }
 
@@ -29,42 +31,42 @@ public class Main {
     private static class Writer extends Thread {
         @Override
         public void run() {
-            resourceLock.lock();
-
             try {
+                resourceLock.acquire();
+
                 System.out.println("Writing");
                 Thread.sleep(1);
+
+                resourceLock.release();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-
-            resourceLock.unlock();
         }
     }
 
     private static class Reader extends Thread {
         @Override
         public void run() {
-            readerLock.lock();
-            readerCount++;
-            if (readerCount == 1) {
-                resourceLock.lock();
-            }
-            readerLock.unlock();
-
             try {
+                readerLock.acquire();
+                readerCount.incrementAndGet();
+                if (readerCount.intValue() == 1) {
+                    resourceLock.acquire();
+                }
+                readerLock.release();
+
                 System.out.println("Read. Readers: " + readerCount);
                 Thread.sleep(1);
+
+                readerLock.acquire();
+                readerCount.decrementAndGet();
+                if (readerCount.intValue() == 0) {
+                    resourceLock.release();
+                }
+                readerLock.release();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-
-            readerLock.lock();
-            readerCount--;
-            if (readerCount == 0) {
-                resourceLock.unlock();
-            }
-            readerLock.unlock();
         }
     }
 }
